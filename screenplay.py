@@ -1,6 +1,6 @@
-import re,os
 from docx import Document
 from docx.shared import Inches
+import re, os
 
 
 def convert(path):
@@ -9,8 +9,7 @@ def convert(path):
     elif not path.endswith('.docx'):
         path += '.docx'
     if path not in os.listdir():
-        print('That file does not exist.')
-        return None
+        return print('That file does not exist.')
     read = Document(path)
     write = Document()
     for paragraph in read.paragraphs:
@@ -34,12 +33,11 @@ def convert(path):
 
 
 
-
 def driver():
     path = ''
-    #docx = DOCX()
     while path != 'exit':
-        prompt = 'Enter document to convert. Enter "exit" to end. "script.docx" is default.\n'
+        prompt = 'Enter document to convert, "exit" to end, and ' \
+                    '"script.docx" is default.\n'
         path = input(prompt)
         path = path.strip().lower()
         if path == 'exit':
@@ -49,3 +47,4 @@ def driver():
 
 driver()
 
+# A python script that reads and formats scripts
