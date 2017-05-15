@@ -45,23 +45,26 @@ def heading(doc,header,body):
     head_f.style = doc.styles['Normal']
 
 
+def style_parenthetical():
+    pass
+
+
+def style_paragraph(doc,text,indent,carriage):
+    fmt = doc.add_paragraph(text)
+    fmt.paragraph_format.left_indent = Inches(indent)
+    fmt.style = doc.styles['Normal']
+    if carriage is not None:
+        fmt.paragraph_format.space_after = Pt(carriage)
+    return fmt
+
+
 def dialogue(doc,header,paragraph):
-    head_f = doc.add_paragraph(header)
-    head_f.paragraph_format.left_indent = Inches(2.6)
-    head_f.paragraph_format.space_after = Pt(0)
-    head_f.line_spacing_rule = WD_LINE_SPACING.DOUBLE
-    head_f.style = doc.styles['Normal']
+    fmt_h = style_paragraph(doc,header,2.6,0)
     if paragraph.startswith('('):
         delim = paragraph.strip('(').split(')')
-        paren_f = doc.add_paragraph('('+delim[0]+')')
-        paren_f.paragraph_format.left_indent = Inches(2.1)
-        paren_f.paragraph_format.space_after = Pt(0)
-        paren_f.style = doc.styles['Normal']
+        fmt_a = style_paragraph(doc,'('+delim[0]+')',2.1,0)
         paragraph = delim[1].strip()
-    body_f = doc.add_paragraph(paragraph)
-    body_f.paragraph_format.left_indent = Inches(1.5)
-    body_f.style = doc.styles['Normal']
-
+    style_paragraph(doc,paragraph,1.5,None)
 
 
 def convert(path):
