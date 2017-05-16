@@ -30,7 +30,7 @@ def split_bracketed(paragraph,left,right):
     return [x for x in re.split(left+'|'+right,paragraph) if x]
 
 
-def description(doc,paragraph):
+def description(doc,paragraph,keys):
     style_paragraph(doc,paragraph,0.0,0.0,None)
 
 
@@ -38,12 +38,14 @@ def is_subheader(header):
     return header == 'INT' or header == 'EXT' or header == 'SUB'
 
 
-def heading(doc,header,body):
+def heading(doc,header,body,keys):
     heading = header+'. '+body.strip().upper()
     style_paragraph(doc,heading,0.0,0.0,None)
 
 
-def dialogue(doc,header,paragraph):
+def dialogue(doc,header,paragraph,tags,keys):
+    if header in tags.keys():
+        header = tags[header]
     style_paragraph(doc,header,2.2,2.0,0)
     if paragraph.startswith('('):
         delim = paragraph.strip('(').split(')',1)
@@ -59,8 +61,22 @@ def transition(doc,text):
     fmt.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 
 
-def page_breaks():
-    pass
+def add_tags(trans,text):
+    key,value = [x.strip().upper() for x in text.split('=')][:2]
+    trans[key] = value
+
+
+def add_keys(trans,text):
+    key,value = [x.strip() for x in text.split('=')][:2]
+    trans[key] = value
+
+
+def transform(text,database):
+    ''' get indeces of where words are to replace
+        replace them so there is no overlap replacing '''
+    #for key,value in database.items():
+    #    if key in text:
+    #        text.replace()
 
 
 def style_margins(doc,top,bottom,left,right):
@@ -79,26 +95,34 @@ def style_paragraph(doc,text,left,right,carriage):
     return fmt
 
 
+def save_doc(doc,path):
+    directory = path.split('/')
+    if len(directory) > 1:
+        doc.save('/'.join(directory[:-1])+'/format_'+directory[-1])
+    else:
+        doc.save('format_'+path)
+
+
 def convert(path):
     read, path = open_read(path)
     write = open_write()
+    tags,keys = {},{}
     for para_obj in read.paragraphs:
         paragraph = split_bracketed(para_obj.text,'<','>')
+        header = paragraph[0].strip().upper()
         if len(paragraph) == 1:
-            description(write,paragraph[0])
-        elif len(paragraph) >= 2:
-            header = paragraph[0].strip().upper()
-            if is_subheader(header):
-                heading(write,header,paragraph[1])
-            elif header == 'TRAN':
-                transition(write,paragraph[1].strip().upper())
-            else:
-                dialogue(write,header,paragraph[1].strip())
-    directory = path.split('/')
-    if len(directory) > 1:
-        write.save('/'.join(directory[:-1])+'/format_'+directory[-1])
-    else:
-        write.save('format_'+path)
+            description(write,paragraph[0],keys)
+        elif is_subheader(header):
+            heading(write,header,paragraph[1],keys)
+        elif header == 'TRAN':
+            transition(write,paragraph[1].strip().upper())
+        elif header == 'TAG':
+            add_tags(tags,paragraph[1])
+        elif header == 'KEY':
+            add_keys(keys,paragraph[1])
+        else:
+            dialogue(write,header,paragraph[1].strip(),tags,keys)
+    save_doc(write,path)
 
 
 def help_prompt():
