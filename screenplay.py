@@ -2,7 +2,7 @@
 from docx import Document
 from docx.shared import Inches
 from docx.shared import Pt
-from docx.enum.text import WD_LINE_SPACING
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 import re, os
 
 
@@ -22,6 +22,7 @@ def open_write():
     font = style.font
     font.name = 'Courier New'
     font.size = Pt(12)
+    style_margins(doc,0,0,1.5,1)
     return doc
 
 
@@ -30,9 +31,7 @@ def split_bracketed(paragraph,left,right):
 
 
 def description(doc,paragraph):
-    desc_f = doc.add_paragraph(paragraph)
-    desc_f.paragraph_format.left_indent = Inches(0.5)
-    desc_f.style = doc.styles['Normal']
+    style_paragraph(doc,paragraph,0.0,0.0,None)
 
 
 def is_subheader(header):
@@ -40,31 +39,44 @@ def is_subheader(header):
 
 
 def heading(doc,header,body):
-    head_f = doc.add_paragraph(header+'. '+body.strip().upper())
-    head_f.paragraph_format.left_indent = Inches(0.5)
-    head_f.style = doc.styles['Normal']
+    heading = header+'. '+body.strip().upper()
+    style_paragraph(doc,heading,0.0,0.0,None)
 
 
-def style_parenthetical():
+def dialogue(doc,header,paragraph):
+    style_paragraph(doc,header,2.2,2.0,0)
+    if paragraph.startswith('('):
+        delim = paragraph.strip('(').split(')',1)
+        style_paragraph(doc,'('+delim[0]+')',1.6,2.0,0)
+        paragraph = delim[1].strip()
+    style_paragraph(doc,paragraph,1.0,1.5,None)
+
+
+def transition(doc,text):
+    if not text.endswith(':'):
+        text += ':'
+    fmt = style_paragraph(doc,text,0.0,0.0,None)
+    fmt.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+
+def page_breaks():
     pass
 
 
-def style_paragraph(doc,text,indent,carriage):
+def style_margins(doc,top,bottom,left,right):
+    for section in doc.sections:
+        section.left_margin = Inches(left)
+        section.right_margin = Inches(right)
+
+
+def style_paragraph(doc,text,left,right,carriage):
     fmt = doc.add_paragraph(text)
-    fmt.paragraph_format.left_indent = Inches(indent)
+    fmt.paragraph_format.left_indent = Inches(left)
+    fmt.paragraph_format.right_indent = Inches(right)
     fmt.style = doc.styles['Normal']
     if carriage is not None:
         fmt.paragraph_format.space_after = Pt(carriage)
     return fmt
-
-
-def dialogue(doc,header,paragraph):
-    fmt_h = style_paragraph(doc,header,2.6,0)
-    if paragraph.startswith('('):
-        delim = paragraph.strip('(').split(')')
-        fmt_a = style_paragraph(doc,'('+delim[0]+')',2.1,0)
-        paragraph = delim[1].strip()
-    style_paragraph(doc,paragraph,1.5,None)
 
 
 def convert(path):
@@ -79,7 +91,7 @@ def convert(path):
             if is_subheader(header):
                 heading(write,header,paragraph[1])
             elif header == 'TRAN':
-                pass
+                transition(write,paragraph[1].strip().upper())
             else:
                 dialogue(write,header,paragraph[1].strip())
     directory = path.split('/')
@@ -89,18 +101,30 @@ def convert(path):
         write.save('format_'+path)
 
 
+def help_prompt():
+    help_msg = "\nThe current markup is '<' and '>'.\n" \
+        "These can be changed by entering '--markup' and " \
+        "the symbols separated by spaces.\n" \
+        "Enter 'exit' to quit.\n"
+    print(help_msg)
+
+
 def driver():
     path = ''
     while path != 'exit':
-        prompt = 'Enter document to convert, "exit" to end, and ' \
-                    '"script.docx" is default.\n'
-        path = input(prompt)
-        path = path.strip().lower()
+        prompt = "\nEnter filepath of .docx to format or " \
+                "--help' for instructions.\n"
+        path = input(prompt).strip().lower()
+        #path = path.strip().lower()
         if path == 'exit':
             return print('Program ended')
-        convert(path)
+        elif path == '--help':
+            help_prompt()
+        else:
+            convert(path)
 
 
 driver()
 
-# A python script that reads and formats scripts
+
+# A pythonic script that reads and formats scripts!

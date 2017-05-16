@@ -1,7 +1,8 @@
 # Script formatter
 
-## Reads scripts and formats properly
+### Reads scripts and formats properly
 
-The script reads a hypertext-like .docx file
-and formats it in a way similar to a screenplay.
-The output file is in the .docx format.
+This Python script reads a specially-formatted .docx file
+that parses documents based on '<' and '>' tags.
+Margins and spacing are automatically formatted and placed
+into a new .docx file which is similar to a screenplay.
