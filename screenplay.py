@@ -7,12 +7,6 @@ import re, os
 
 
 def open_read(path):
-    if path == '':
-        path = 'script.docx'
-    elif not path.endswith('.docx'):
-        path += '.docx'
-    if path not in os.listdir():
-        return print('That file does not exist.')
     return Document(path), path
 
 
@@ -30,6 +24,7 @@ def split_bracketed(paragraph,left,right):
     return [x for x in re.split(left+'|'+right,paragraph) if x]
 
 
+# accept transform here
 def description(doc,paragraph,keys):
     style_paragraph(doc,paragraph,0.0,0.0,None)
 
@@ -38,11 +33,13 @@ def is_subheader(header):
     return header == 'INT' or header == 'EXT' or header == 'SUB'
 
 
+# accept transform here
 def heading(doc,header,body,keys):
     heading = header+'. '+body.strip().upper()
     style_paragraph(doc,heading,0.0,0.0,None)
 
 
+# accept transform here
 def dialogue(doc,header,paragraph,tags,keys):
     if header in tags.keys():
         header = tags[header]
@@ -54,6 +51,7 @@ def dialogue(doc,header,paragraph,tags,keys):
     style_paragraph(doc,paragraph,1.0,1.5,None)
 
 
+# accept in transform here
 def transition(doc,text):
     if not text.endswith(':'):
         text += ':'
@@ -68,15 +66,15 @@ def add_tags(trans,text):
 
 def add_keys(trans,text):
     key,value = [x.strip() for x in text.split('=')][:2]
-    trans[key] = value
+    trans[' '+key+' '] = value
 
 
 def transform(text,database):
     ''' get indeces of where words are to replace
         replace them so there is no overlap replacing '''
-    #for key,value in database.items():
-    #    if key in text:
-    #        text.replace()
+    for key,value in database.items():
+        if key in text:
+            text.replace()
 
 
 def style_margins(doc,top,bottom,left,right):
@@ -96,11 +94,8 @@ def style_paragraph(doc,text,left,right,carriage):
 
 
 def save_doc(doc,path):
-    directory = path.split('/')
-    if len(directory) > 1:
-        doc.save('/'.join(directory[:-1])+'/format_'+directory[-1])
-    else:
-        doc.save('format_'+path)
+    name = path.split('.')
+    doc.save('.'.join(name[:-1])+'_formatted.'+name[-1])
 
 
 def convert(path):
@@ -125,6 +120,16 @@ def convert(path):
     save_doc(write,path)
 
 
+def validity(path):
+    if path == '':
+        path = 'script.docx'
+    elif not path.endswith('.docx'):
+        path += '.docx'
+    if path not in os.listdir():
+        return print('That file does not exist.')
+    return path
+
+
 def help_prompt():
     help_msg = "\nThe current markup is '<' and '>'.\n" \
         "These can be changed by entering '--markup' and " \
@@ -134,18 +139,18 @@ def help_prompt():
 
 
 def driver():
-    path = ''
-    while path != 'exit':
+    while True:
         prompt = "\nEnter filepath of .docx to format or " \
                 "--help' for instructions.\n"
-        path = input(prompt).strip().lower()
-        #path = path.strip().lower()
+        path = input(prompt).strip()
         if path == 'exit':
             return print('Program ended')
         elif path == '--help':
             help_prompt()
         else:
-            convert(path)
+            path = validity(path)
+            if path:
+                convert(path)
 
 
 driver()
