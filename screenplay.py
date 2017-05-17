@@ -87,10 +87,19 @@ def transform(trans,text):
         replace them so there is no overlap replacing '''
     #indeces = {k:[] for k in }
     for key, value in trans.items():
+        #pattern = '^'+key+' | '+key+'$ | ' +key+' '
+        #text = re.sub(pattern,value,text)
+        #text = re.sub('^'+key+' ',value+' ',text)
+        #text = re.sub(' '+key+' ',' '+value+' ',text)
+        #text = re.sub(' '+key+'?=\W+|$',' '+value,text)
         #if key in text:
         #    text = re.sub(key,value,text)
+
+        text = re.sub('(^| )'+key+'(?=[ .?!])',' '+value,text)
+        #text = re.sub('^'+key+' ',value+' ',text)
+
         # replace if at start or end or surrounded by spaces
-    return text
+    return text.strip()
 
 
 def style_margins(doc,top,bottom,left,right):
