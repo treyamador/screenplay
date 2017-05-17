@@ -20,8 +20,8 @@ def open_write():
     return doc
 
 
-def split_bracketed(paragraph,left,right):
-    return [x for x in re.split(left+'|'+right,paragraph) if x]
+def split_bracketed(para,left,right):
+    return [x for x in re.split(left+'|'+right,para) if x]
 
 
 # accept transform here
@@ -34,14 +34,12 @@ def is_subheader(header):
     return header == 'INT' or header == 'EXT' or header == 'SUB'
 
 
-# accept transform here
 def heading(doc,header,text,keys):
-    desc = transform(keys,header)
+    desc = transform(keys,text)
     heading = header+'. '+desc.strip().upper()
     style_paragraph(doc,heading,0.0,0.0,None)
 
 
-# accept transform here
 def dialogue(doc,header,paragraph,tags,keys):
     header = transform(tags,header)
     paragraph = transform(keys,paragraph)
@@ -53,7 +51,6 @@ def dialogue(doc,header,paragraph,tags,keys):
     style_paragraph(doc,paragraph,1.0,1.5,None)
 
 
-# accept in transform here
 def transition(doc,text,keys):
     text = transform(keys,text)
     if not text.endswith(':'):
@@ -70,16 +67,6 @@ def add_tags(trans,text):
 def add_keys(trans,text):
     key,value = [x.strip() for x in text.split('=')][:2]
     trans[key] = value
-
-
-#def replace_tag(tags,header):
-#    pass
-    #for key,value in tags.items():
-    #    if key in header:
-    #        header = re.sub(key,)
-    #if header in tags.keys():
-    #    header = tags[header]
-    #return header
 
 
 # keep an eye on this, make sure it continues to look good
@@ -105,9 +92,19 @@ def style_paragraph(doc,text,left,right,carriage):
     return fmt
 
 
+def shape_entry(para_obj):
+    try:
+        paragraph = split_bracketed(para_obj.text,'<','>')
+        header = paragraph[0].strip().upper()
+    except IndexError:
+        return None,None
+    else:
+        return paragraph,header
+
+
 def save_doc(doc,path):
     name = path.split('.')
-    doc.save('.'.join(name[:-1])+'_formatted.'+name[-1])
+    doc.save('.'.join(name[:-1])+'.formatted.'+name[-1])
 
 
 def convert(path):
@@ -115,9 +112,10 @@ def convert(path):
     write = open_write()
     tags,keys = {},{}
     for para_obj in read.paragraphs:
-        paragraph = split_bracketed(para_obj.text,'<','>')
-        header = paragraph[0].strip().upper()
-        if len(paragraph) == 1:
+        paragraph,header = shape_entry(para_obj)
+        if not paragraph:
+            pass
+        elif len(paragraph) == 1:
             description(write,paragraph[0],keys)
         elif is_subheader(header):
             heading(write,header,paragraph[1],keys)
@@ -146,6 +144,7 @@ def help_prompt():
     help_msg = "\nThe current markup is '<' and '>'.\n" \
         "These can be changed by entering '--markup' and " \
         "the symbols separated by spaces.\n" \
+        "If no file is entered, the program will look for script.docx" \
         "Enter 'exit' to quit.\n"
     print(help_msg)
 
@@ -169,3 +168,4 @@ driver()
 
 
 # A pythonic script that reads and formats scripts!
+
