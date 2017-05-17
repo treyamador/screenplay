@@ -6,7 +6,7 @@ from docx import Document
 from docx.shared import Inches
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-import re, os
+import sys, re, os
 
 
 def open_read(path):
@@ -28,9 +28,12 @@ def split_bracketed(para,left,right):
 
 
 # accept transform here
-def description(doc,paragraph,keys):
-    paragraph = transform(keys,paragraph)
-    style_paragraph(doc,paragraph,0.0,0.0,None)
+def description(doc,text,keys,cast):
+    text = transform(keys,text)
+    for player in cast:
+        for i in [x.start() for x in re.finditer(player,text.upper())]:
+            text = text[:i]+player+text[len(player)+i:]
+    style_paragraph(doc,text,0.0,0.0,None)
 
 
 def is_subheader(header):
@@ -43,9 +46,11 @@ def heading(doc,header,text,keys):
     style_paragraph(doc,heading,0.0,0.0,None)
 
 
-def dialogue(doc,header,paragraph,tags,keys):
+def dialogue(doc,header,paragraph,tags,keys,cast):
     header = transform(tags,header)
-    paragraph = transform(keys,paragraph)
+    if header not in cast:
+        cast.append(header)
+    paragraph = transform(keys,paragraph.strip())
     style_paragraph(doc,header,2.2,2.0,0)
     if paragraph.startswith('('):
         delim = paragraph.strip('(').split(')',1)
@@ -107,19 +112,24 @@ def shape_entry(para_obj):
 
 def save_doc(doc,path):
     name = path.split('.')
-    doc.save('.'.join(name[:-1])+'.formatted.'+name[-1])
+    saved_path = '.'.join(name[:-1])+'.formatted.'+name[-1]
+    try:
+        doc.save(saved_path)
+    except PermissionError:
+        print('Unable to save file. Try again after closing file with same name.')
 
 
 def convert(path):
     read, path = open_read(path)
     write = open_write()
     tags,keys = {},{}
+    cast = []
     for para_obj in read.paragraphs:
         paragraph,header = shape_entry(para_obj)
         if not paragraph:
             pass
         elif len(paragraph) == 1:
-            description(write,paragraph[0],keys)
+            description(write,paragraph[0],keys,cast)
         elif is_subheader(header):
             heading(write,header,paragraph[1],keys)
         elif header == 'TRAN':
@@ -129,7 +139,7 @@ def convert(path):
         elif header == 'KEY':
             add_keys(keys,paragraph[1])
         else:
-            dialogue(write,header,paragraph[1].strip(),tags,keys)
+            dialogue(write,header,paragraph[1],tags,keys,cast)
     save_doc(write,path)
 
 
@@ -161,7 +171,14 @@ def help_prompt():
     print(help_msg)
 
 
-def driver():
+def command_line_input(argv):
+    path = validity(' '.join(sys.argv[1:]))
+    if path:
+        convert(path)    
+    print('Process finished.')
+
+
+def user_input():
     while True:
         prompt = "\nEnter filepath of .docx to format or " \
                 "--help' for instructions.\n"
@@ -174,6 +191,13 @@ def driver():
             path = validity(path)
             if path:
                 convert(path)
+
+
+def driver():
+    if len(sys.argv) > 1:
+        command_line_input(sys.argv)
+    else:
+        user_input()
 
 
 driver()
