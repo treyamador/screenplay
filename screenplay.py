@@ -82,23 +82,10 @@ def add_keys(trans,text):
     #return header
 
 
+# keep an eye on this, make sure it continues to look good
 def transform(trans,text):
-    ''' get indeces of where words are to replace
-        replace them so there is no overlap replacing '''
-    #indeces = {k:[] for k in }
     for key, value in trans.items():
-        #pattern = '^'+key+' | '+key+'$ | ' +key+' '
-        #text = re.sub(pattern,value,text)
-        #text = re.sub('^'+key+' ',value+' ',text)
-        #text = re.sub(' '+key+' ',' '+value+' ',text)
-        #text = re.sub(' '+key+'?=\W+|$',' '+value,text)
-        #if key in text:
-        #    text = re.sub(key,value,text)
-
-        text = re.sub('(^| )'+key+'(?=[ .?!])',' '+value,text)
-        #text = re.sub('^'+key+' ',value+' ',text)
-
-        # replace if at start or end or surrounded by spaces
+        text = re.sub('(^| )'+key+'((?=[ .?!])|$)',' '+value,text)
     return text.strip()
 
 
