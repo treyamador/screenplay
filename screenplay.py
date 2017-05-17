@@ -85,8 +85,8 @@ def add_keys(trans,text):
 # keep an eye on this, make sure it continues to look good
 def transform(trans,text):
     for key, value in trans.items():
-        text = re.sub('(^| )'+key+'((?=[ .?!])|$)',' '+value,text)
-    return text.strip()
+        text = re.sub('((?<= )|^)'+key+'((?=[ .?!])|$)',value,text)
+    return text
 
 
 def style_margins(doc,top,bottom,left,right):
