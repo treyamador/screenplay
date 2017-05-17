@@ -26,6 +26,7 @@ def split_bracketed(paragraph,left,right):
 
 # accept transform here
 def description(doc,paragraph,keys):
+    paragraph = transform(keys,paragraph)
     style_paragraph(doc,paragraph,0.0,0.0,None)
 
 
@@ -34,15 +35,16 @@ def is_subheader(header):
 
 
 # accept transform here
-def heading(doc,header,body,keys):
-    heading = header+'. '+body.strip().upper()
+def heading(doc,header,text,keys):
+    desc = transform(keys,header)
+    heading = header+'. '+desc.strip().upper()
     style_paragraph(doc,heading,0.0,0.0,None)
 
 
 # accept transform here
 def dialogue(doc,header,paragraph,tags,keys):
-    if header in tags.keys():
-        header = tags[header]
+    header = transform(tags,header)
+    paragraph = transform(keys,paragraph)
     style_paragraph(doc,header,2.2,2.0,0)
     if paragraph.startswith('('):
         delim = paragraph.strip('(').split(')',1)
@@ -52,7 +54,8 @@ def dialogue(doc,header,paragraph,tags,keys):
 
 
 # accept in transform here
-def transition(doc,text):
+def transition(doc,text,keys):
+    text = transform(keys,text)
     if not text.endswith(':'):
         text += ':'
     fmt = style_paragraph(doc,text,0.0,0.0,None)
@@ -66,15 +69,28 @@ def add_tags(trans,text):
 
 def add_keys(trans,text):
     key,value = [x.strip() for x in text.split('=')][:2]
-    trans[' '+key+' '] = value
+    trans[key] = value
 
 
-def transform(text,database):
+#def replace_tag(tags,header):
+#    pass
+    #for key,value in tags.items():
+    #    if key in header:
+    #        header = re.sub(key,)
+    #if header in tags.keys():
+    #    header = tags[header]
+    #return header
+
+
+def transform(trans,text):
     ''' get indeces of where words are to replace
         replace them so there is no overlap replacing '''
-    for key,value in database.items():
-        if key in text:
-            text.replace()
+    #indeces = {k:[] for k in }
+    for key, value in trans.items():
+        #if key in text:
+        #    text = re.sub(key,value,text)
+        # replace if at start or end or surrounded by spaces
+    return text
 
 
 def style_margins(doc,top,bottom,left,right):
@@ -110,7 +126,7 @@ def convert(path):
         elif is_subheader(header):
             heading(write,header,paragraph[1],keys)
         elif header == 'TRAN':
-            transition(write,paragraph[1].strip().upper())
+            transition(write,paragraph[1].strip().upper(),keys)
         elif header == 'TAG':
             add_tags(tags,paragraph[1])
         elif header == 'KEY':
