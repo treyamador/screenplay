@@ -1,6 +1,6 @@
 # Script formatter
 
-#### Reads scripts and formats properly
+### Reads scripts and formats properly
 
 This Python script reads a specially-formatted .docx file that parses documents based on '<' and '>' tags. Margins and spacing are automatically formatted and placed into a new .docx file which is similar to a screenplay.
 
@@ -8,4 +8,4 @@ Tags for Interior, Exterior, Transitions by default. Any non-default names are i
 
 Each paragraph is treated as a different section. When a tag is included at the beginning of the paragraph, it follows the entirety of the paragraph.
 
-Additionally, the <key> and <tag> tags allows you to replace a unique string with a word.  The string must be its own word, i.e. it cannot be within a larger word.
+Additionally, the 'key' and 'tag' tags allows you to replace a unique string with a word.  The string must be its own word, i.e. it cannot be within a larger word.

@@ -1,4 +1,7 @@
 # a pythonic screenplay formatter
+# it's good
+
+
 from docx import Document
 from docx.shared import Inches
 from docx.shared import Pt
@@ -131,13 +134,22 @@ def convert(path):
 
 
 def validity(path):
+
+    def query_dir(path,dirc,file):
+        if file in os.listdir(dirc):
+            return path
+        else:
+            return print('That file does not exist.')
+
     if path == '':
         path = 'script.docx'
     elif not path.endswith('.docx'):
         path += '.docx'
-    if path not in os.listdir():
-        return print('That file does not exist.')
-    return path
+    dirc = path.split('/',1)
+    if len(dirc) > 1:
+        return query_dir(path,dirc[0],dirc[1])
+    else:
+        return query_dir(path,None,path)
 
 
 def help_prompt():
