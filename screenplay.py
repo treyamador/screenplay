@@ -80,8 +80,13 @@ def add_keys(trans,text):
 # keep an eye on this, make sure it continues to look good
 def transform(trans,text):
     for key, value in trans.items():
-        text = re.sub('((?<= )|^)'+key+'((?=[ .?!])|$)',value,text)
+        text = re.sub('((?<= )|^)'+key+'((?=[ .,?!])|$)',value,text)
     return text
+
+
+def is_a_note(paragraph):
+    text = paragraph.strip()
+    return text[0] == '['
 
 
 def style_margins(doc,top,bottom,left,right):
@@ -129,7 +134,8 @@ def convert(path):
         if not paragraph:
             pass
         elif len(paragraph) == 1:
-            description(write,paragraph[0],keys,cast)
+            if not is_a_note(paragraph[0]):
+                description(write,paragraph[0],keys,cast)
         elif is_subheader(header):
             heading(write,header,paragraph[1],keys)
         elif header == 'TRAN':
