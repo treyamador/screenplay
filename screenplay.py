@@ -80,7 +80,8 @@ def add_keys(trans,text):
 # keep an eye on this, make sure it continues to look good
 def transform(trans,text):
     for key, value in trans.items():
-        text = re.sub('((?<= )|^)'+key+'((?=[ .,?!])|$)',value,text)
+        text = re.sub('((?<= )|^)'+key+'((?=\W)|$)',value,text)
+        #text = re.sub(r'((?<= )|^)'+key+"((?=[ .,?!\'])|$)",value,text)
     return text
 
 
