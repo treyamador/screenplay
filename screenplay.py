@@ -81,7 +81,6 @@ def add_keys(trans,text):
 def transform(trans,text):
     for key, value in trans.items():
         text = re.sub('((?<= )|^)'+key+'((?=\W)|$)',value,text)
-        #text = re.sub(r'((?<= )|^)'+key+"((?=[ .,?!\'])|$)",value,text)
     return text
 
 
@@ -181,7 +180,7 @@ def help_prompt():
 def command_line_input(argv):
     path = validity(' '.join(sys.argv[1:]))
     if path:
-        convert(path)    
+        convert(path)
     print('Process finished.')
 
 
@@ -211,4 +210,3 @@ driver()
 
 
 # A pythonic script that reads and formats scripts!
-
