@@ -115,6 +115,13 @@ def shape_entry(para_obj):
         return paragraph,header
 
 
+def print_dict(items):
+    with open('dicst.txt','wb') as f:
+        for key,val in items.items():
+            uni_item = u''+key+': '+val+'\r\n'
+            f.write(uni_item.encode('utf-8'))
+
+
 def save_doc(doc,path):
     name = path.split('.')
     saved_path = '.'.join(name[:-1])+'.formatted.'+name[-1]
@@ -146,6 +153,7 @@ def convert(path):
             add_keys(keys,paragraph[1])
         else:
             dialogue(write,header,paragraph[1],tags,keys,cast)
+    print_dict(keys)
     save_doc(write,path)
 
 
